@@ -39,6 +39,7 @@ type GithubRepositoryModel struct {
 	http.RequestableModel
 }
 
+// NewRepositoryModel This method creates a new GithubRepositoryModel instance using the given parameters.
 func NewRepositoryModel(owner, name, description string, license *string, attributes AttributesContainer) *GithubRepositoryModel {
 	return &GithubRepositoryModel{
 		owner:       owner,
@@ -49,6 +50,7 @@ func NewRepositoryModel(owner, name, description string, license *string, attrib
 	}
 }
 
+// Type Override to interface's function to return the specific-type for this model.
 func Type() string {
 	return "repository"
 }
@@ -78,14 +80,17 @@ func (r *GithubRepositoryModel) Attributes() *AttributesContainer {
 	return &r.attributes
 }
 
+// codec.Provider's implementation necessary for this type.
 var repositoryCodec = codec.RepositoryCodecProvider{}
 
+// RequestModelImpl This codec.Provider implementation is used to handle requests for repositories.
 type RequestModelImpl struct {
 	http.RequestModel[GithubRepositoryModel]
 	responseModel *http.ResponseModel
 	url           string
 }
 
+// NewRepositoryRequest This function creates a new RequestModelImpl with the given url.
 func NewRepositoryRequest(url string) *RequestModelImpl {
 	http.Url = url
 	return &RequestModelImpl{url: http.Url}
@@ -97,8 +102,8 @@ func Request() *async.Future[GithubRepositoryModel] {
 		return nil
 	}
 	responseModel := f.Get()
-	return async.NewFuture(func() *GithubRepositoryModel {
-		return repositoryCodec.From(responseModel.JSON())
+	return async.NewFuture(func() GithubRepositoryModel {
+		return *repositoryCodec.From(responseModel.JSON())
 	})
 }
 
@@ -109,7 +114,7 @@ func RequestAndThen(consumer functional.RequestConsumer[GithubRepositoryModel]) 
 	}
 	repositoryModel := repositoryCodec.From(f.Get().JSON()) // Obtain result from async.Future pass the received JSON (body).
 	consumer(repositoryModel)                               // Execute consumer logic with deserialized model
-	return async.NewFuture(func() *GithubRepositoryModel {
-		return repositoryModel
+	return async.NewFuture(func() GithubRepositoryModel {
+		return *repositoryModel
 	})
 }

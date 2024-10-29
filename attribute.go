@@ -35,6 +35,7 @@ type AttributesContainer struct {
 	topics   *[]string
 }
 
+// NewAttributesContainer This function creates a new AttributesContainer instance with the given parameters.
 func NewAttributesContainer(forked bool, parent *string, canFork bool, stars, forks int32, private bool, archived bool, disabled bool, language string, topics *[]string) AttributesContainer {
 	return AttributesContainer{
 		forked:   forked,

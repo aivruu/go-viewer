@@ -22,6 +22,7 @@
 package download
 
 import (
+	"fmt"
 	"io"
 	"os"
 	"viewer/main/utils"
@@ -33,21 +34,32 @@ func From(fileName string, url string) *DownloadingStatusProvider {
 	if err != nil {
 		return WithDownloadError()
 	}
-	// Close after creation function call.
-	defer func(file *os.File) {
-		panic(file.Close())
+	defer func(File *os.File) {
+		err := File.Close()
+		if err != nil {
+			fmt.Println("Error during File closing: ", err)
+		}
 	}(file)
-	f := utils.Response(url)
-	if f == nil {
+	resp := utils.Response(nil, url)
+	if resp == nil {
 		return WithDownloadError()
 	}
-	resp := f.Get()
-	n, err := io.Copy(file, resp.Body())
+	body := resp.Body()
+	if body == nil {
+		return WithDownloadError()
+	}
+	defer func(Body *io.ReadCloser) {
+		err := (*Body).Close()
+		if err != nil {
+			fmt.Println("Error during Body closing: ", err)
+		}
+	}(body)
+	size, err := io.Copy(file, *body)
 	if err != nil {
 		return WithDownloadError()
 	}
-	if n == 0 {
+	if size == 0 {
 		return WithUnknownAsset()
 	}
-	return WithAssetDownload(n)
+	return WithAssetDownload(size)
 }

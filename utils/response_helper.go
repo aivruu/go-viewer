@@ -22,32 +22,71 @@
 package utils
 
 import (
+	"fmt"
 	"io"
 	"net/http"
 	"viewer/main/async"
-	"viewer/main/codec"
-	"viewer/main/functional"
+	"viewer/main/common"
 	vhttp "viewer/main/http"
 	status "viewer/main/http/response"
+	"viewer/main/repository/codec"
 )
 
-// Response This function makes a request to the given url, and returns a pointer of async.Future, which contains the http.ResponseModel
-// with this request's response's main-information.
-func Response(url string) *async.Future[vhttp.ResponseModel] {
-	resp, err := http.Get(url)
-	if err != nil {
-		return nil
+// AsyncResponseWith This function makes a request to the given url using the given http.Client, and returns an async.Future,
+// this object's function may return a http.ResponseModel, or nil depending on operation success.
+func asyncResponseWith(client *http.Client, url string) async.Future[vhttp.ResponseModel] {
+	return async.NewFuture(func() *vhttp.ResponseModel {
+		resp, err := client.Get(url)
+		if err != nil {
+			return nil
+		}
+		read, err := io.ReadAll(resp.Body)
+		if err != nil {
+			return nil
+		}
+		// Close body after reading.
+		defer func(Body *io.ReadCloser) {
+			err := (*Body).Close()
+			if err != nil {
+				fmt.Println("Error during Body closing: ", err)
+			}
+		}(&resp.Body)
+		return vhttp.NewResponseModel(string(read), resp.StatusCode, &resp.Body)
+	})
+}
+
+// Response This function realizes a request and provides an async response of async.Future type, this function checks if the
+// provided http.Client is nil, if it is, it will call to the asyncResponse function, otherwise, it will use asyncResponseWith
+func Response(client *http.Client, url string) *vhttp.ResponseModel {
+	var response async.Future[vhttp.ResponseModel]
+	if client == nil {
+		response = asyncResponse(url)
+	} else {
+		response = asyncResponseWith(client, url)
 	}
-	read, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return nil
-	}
-	// Close body after reading.
-	defer func(Body io.ReadCloser) {
-		panic(Body.Close())
-	}(resp.Body)
-	return async.NewFuture(func() vhttp.ResponseModel {
-		return *vhttp.NewResponseModel(string(read), resp.StatusCode, resp.Body)
+	return response.Get()
+}
+
+// AsyncResponse This function makes a request to the given url using a default client and returns an async.Future,
+// this object's function may return a http.ResponseModel, or nil depending on operation success.
+func asyncResponse(url string) async.Future[vhttp.ResponseModel] {
+	return async.NewFuture(func() *vhttp.ResponseModel {
+		resp, err := vhttp.DefaultClient.Get(url)
+		if err != nil {
+			return nil
+		}
+		read, err := io.ReadAll(resp.Body)
+		if err != nil {
+			return nil
+		}
+		// Close body after reading.
+		defer func(Body *io.ReadCloser) {
+			err := (*Body).Close()
+			if err != nil {
+				fmt.Println("Error during Body closing: ", err)
+			}
+		}(&resp.Body)
+		return vhttp.NewResponseModel(string(read), resp.StatusCode, &resp.Body)
 	})
 }
 
@@ -55,7 +94,7 @@ func Response(url string) *async.Future[vhttp.ResponseModel] {
 // and provide a http.ResponseStatusProvider depending on given response-code.
 //
 // Additionally, if the response is valid, the model will be used to execute the given consumer.
-func VerifyAndProvideResponse[M vhttp.RequestableModel](resp *vhttp.ResponseModel, consumer *functional.RequestConsumer[M], codecProvider codec.Provider[M]) *vhttp.ResponseStatusProvider[M] {
+func VerifyAndProvideResponse[M common.RequestableModel](resp *vhttp.ResponseModel, consumer *common.RequestConsumer[M], codecProvider codec.Provider[M]) *vhttp.ResponseStatusProvider[M] {
 	if resp == nil {
 		return vhttp.WithUnauthorizedResponse[M]()
 	}

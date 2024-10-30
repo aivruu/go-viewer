@@ -22,9 +22,9 @@
 package download
 
 const (
-	AssetDownloadedStatus    = byte(0)
-	UnknownAssetStatus       = byte(1)
-	AssetDownloadErrorStatus = byte(2)
+	AssetDownloadedStatus    = byte(0)   // Asset was downloaded.
+	UnknownAssetStatus       = byte(1)   // The asset wasn't downloaded, may be unknown.
+	AssetDownloadErrorStatus = byte(2)   // The asset couldn't be downloaded.
 	UnknownAssetDefaultSize  = int64(0)  // Used for non-downloaded (zero read bytes) assets.
 	InvalidAssetDefaultSize  = int64(-1) // Used for failed-downloaded assets.
 )
@@ -51,4 +51,29 @@ func WithUnknownAsset() *DownloadingStatusProvider {
 // and using the AssetDownloadErrorStatus status.
 func WithDownloadError() *DownloadingStatusProvider {
 	return &DownloadingStatusProvider{status: AssetDownloadErrorStatus, result: InvalidAssetDefaultSize}
+}
+
+// Status This method returns this instance's status-code.
+func (d *DownloadingStatusProvider) Status() byte {
+	return d.status
+}
+
+// Result This method returns this object's result (read-bytes).
+func (d *DownloadingStatusProvider) Result() int64 {
+	return d.result
+}
+
+// Downloaded This method return whether the status-code is AssetDownloadedStatus.
+func (d *DownloadingStatusProvider) Downloaded() bool {
+	return d.status == AssetDownloadedStatus
+}
+
+// Unknown This method return whether the status-code is UnknownAssetStatus.
+func (d *DownloadingStatusProvider) Unknown() bool {
+	return d.status == UnknownAssetStatus
+}
+
+// Error This method return whether the status-code is AssetDownloadErrorStatus.
+func (d *DownloadingStatusProvider) Error() bool {
+	return d.status == AssetDownloadErrorStatus
 }

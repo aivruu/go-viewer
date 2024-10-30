@@ -28,20 +28,26 @@ type Future[T any] struct {
 	result chan T
 }
 
-// NewFuture This method creates a new Future object using the specified function.
-func NewFuture[T any](fn func() T) *Future[T] {
+// NewFuture This method creates a new Future object using the specified function, this function may return a value, or nil.
+func NewFuture[T any](fn func() *T) Future[T] {
 	rwMut := sync.RWMutex{}
-	f := &Future[T]{result: make(chan T)}
+	f := Future[T]{make(chan T)}
 	rwMut.RLock()
 	// Use goroutines for channel-to-channel communication.
 	go func() {
-		f.result <- fn()
+		result := fn()
+		// Avoid dereferencing for a null pointer
+		if result == nil {
+			result = new(T)
+		}
+		// Give to channel the pointer's value.
+		f.result <- *result
 	}()
 	rwMut.RUnlock()
 	return f
 }
 
-// Get This method returns this Future's value (result) when it becomes available.
+// Get This method returns this Future's pointer (result) when it becomes available.
 func (f *Future[T]) Get() *T {
 	value := <-f.result
 	return &value

@@ -22,19 +22,33 @@
 package http
 
 import (
-	"viewer/main/async"
-	"viewer/main/functional"
+	"net/http"
+	"viewer/main/common"
 )
 
-// Url The URL that contains the url to where the request will be sent.
-var Url string
+// DefaultClient A default http.Client used with functions that doesn't require a http.Client object.
+var DefaultClient = &http.Client{}
 
 // RequestModel This interface is used to proportionate request-method to get information for models-serialization.
-type RequestModel[M RequestableModel] interface {
-	// Request This method request to the URL and returns an async.Future with the model object.
-	Request() *async.Future[M]
+type RequestModel[M common.RequestableModel] interface {
+	// RequestWith This method request to the URL using the given http.Client and returns the model with the requested information
+	// if it is available.
+	RequestWith(client *http.Client) *M
 
-	// RequestAndThen This method request to the URL and provides an async.Future with the model. If the model is available,
-	// it will be used to execute the specified consumer's logic.
-	RequestAndThen(consumer functional.RequestConsumer[M]) *async.Future[M]
+	// RequestWithAndThen This method request to the URL using the given http.Client and provides the model (if it is available)
+	// with the requested information. Also, if the model is available, it will be used to execute the specified consumer's
+	// logic.
+	RequestWithAndThen(client *http.Client, consumer common.RequestConsumer[M]) *M
+}
+
+// Request This method realizes the same execution that RequestAndThen with the difference that this uses a default
+// http.Client to make the request.
+func Request[M common.RequestableModel](requestModel RequestModel[M]) *M {
+	return requestModel.RequestWith(DefaultClient)
+}
+
+// RequestAndThen This method realizes the same execution that RequestWithAndThen with the difference that this uses a
+// default http.Client to make the request.
+func RequestAndThen[M common.RequestableModel](requestModel RequestModel[M], consumer common.RequestConsumer[M]) *M {
+	return requestModel.RequestWithAndThen(DefaultClient, consumer)
 }

@@ -19,10 +19,7 @@
 // FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 // OTHER DEALINGS IN THE SOFTWARE.
 
-package http
+package common
 
 // RequestableModel An interface used to define models that can be used with RequestModel objects.
-type RequestableModel interface {
-	// Type This method returns a string that contains the type of the model which implements this interface.
-	Type() string
-}
+type RequestableModel interface{}

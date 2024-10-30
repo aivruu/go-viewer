@@ -22,7 +22,7 @@
 package response
 
 const (
-	OK               = 302 // The request was accepted.
+	OK               = 200 // The request was accepted.
 	NotFound         = 404 // The requested resource was not found.
 	Forbidden        = 503 // The request was denied.
 	Unauthorized     = 401 // The request was denied due to invalid credentials.

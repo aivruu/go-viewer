@@ -21,32 +21,4 @@
 
 package main
 
-import (
-	"fmt"
-	"viewer/main/release"
-)
-
-func main() {
-	// Request test for repository's latest release.
-	releaseRequest := release.NewReleaseRequest(ForRelease("aivruu", "repo-viewer", "v3.4.7"))
-	releaseFuture := releaseRequest.Request()
-	releaseModel := releaseFuture.Get()
-	if releaseModel == nil {
-		fmt.Println("Failed to request the request for this repository.")
-		return
-	}
-	fmt.Printf("%s - %s - %s", releaseModel.Author(), releaseModel.Name(), releaseModel.TagName())
-
-	repositoryModel := NewRepositoryRequest(ForRepository("aivruu", "repo-viewer"))
-	repositoryFuture := repositoryModel.RequestAndThen(
-		func(Model *GithubRepositoryModel) {
-			value := *Model
-			fmt.Printf("%s - %s - %s", value.Owner(), value.Name(), *value.License())
-		},
-	)
-	if repositoryFuture.Get() == nil {
-		fmt.Println("Failed to request the repository.")
-		return
-	}
-	fmt.Println("Repository request is successful.")
-}
+func main() {}

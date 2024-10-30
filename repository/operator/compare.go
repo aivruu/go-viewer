@@ -1,6 +1,6 @@
-package release
+package operator
 
-// Operator This type correspond to a determinated operator (byte-value) that can be used to compare two numbers.
+// Operator This type correspond to an operator (byte-value) that can be used to compare two numbers.
 type Operator byte
 
 const (

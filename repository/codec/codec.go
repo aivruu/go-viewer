@@ -19,9 +19,16 @@
 // FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 // OTHER DEALINGS IN THE SOFTWARE.
 
-package functional
+package codec
 
-import "viewer/main/http"
+import (
+	"viewer/main/common"
+)
 
-// RequestConsumer Simple type with single function used to represent Consumers.
-type RequestConsumer[M http.RequestableModel] func(*M)
+// Provider This interface is used to proportionate a scalable way to deserialize json-data into common.RequestableModel structs,
+// or implementations.
+type Provider[M common.RequestableModel] interface {
+	// From Uses the given information to return a deserialized model based on the given json-body, the model returned can
+	// be of any type that implements the common.RequestableModel interface.
+	From(json string) *M
+}

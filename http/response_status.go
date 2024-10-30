@@ -21,6 +21,8 @@
 
 package http
 
+import "viewer/main/common"
+
 const (
 	ValidResponseStatus            = byte(0) // The response was provided.
 	UnauthorizedResponseStatus     = byte(1) // The response was not provided because the user is not authorized.
@@ -30,33 +32,33 @@ const (
 )
 
 // ResponseStatusProvider This struct represents a status-provider used for requests' responses.
-type ResponseStatusProvider[M RequestableModel] struct {
+type ResponseStatusProvider[M common.RequestableModel] struct {
 	status byte // The response's code.
 	result *M   // The model provided for the response.
 }
 
 // WithValidResponse This method returns a new ResponseStatusProvider using the given model, and the ValidResponseStatus value.
-func WithValidResponse[M RequestableModel](model *M) *ResponseStatusProvider[M] {
+func WithValidResponse[M common.RequestableModel](model *M) *ResponseStatusProvider[M] {
 	return &ResponseStatusProvider[M]{status: ValidResponseStatus, result: model}
 }
 
 // WithUnauthorizedResponse This method returns a new ResponseStatusProvider using the given model, and the UnauthorizedResponseStatus value.
-func WithUnauthorizedResponse[M RequestableModel]() *ResponseStatusProvider[M] {
-	return &ResponseStatusProvider[M]{status: UnauthorizedResponseStatus}
+func WithUnauthorizedResponse[M common.RequestableModel]() *ResponseStatusProvider[M] {
+	return &ResponseStatusProvider[M]{status: UnauthorizedResponseStatus, result: nil}
 }
 
 // WithMovedPermanentlyResponse This method returns a new ResponseStatusProvider using the given model, and the MovedPermanentlyResponseStatus value.
-func WithMovedPermanentlyResponse[M RequestableModel]() *ResponseStatusProvider[M] {
+func WithMovedPermanentlyResponse[M common.RequestableModel]() *ResponseStatusProvider[M] {
 	return &ResponseStatusProvider[M]{status: MovedPermanentlyResponseStatus, result: nil}
 }
 
 // WithForbiddenResponse This method returns a new ResponseStatusProvider using the given model, and the ForbiddenResponseStatus value.
-func WithForbiddenResponse[M RequestableModel]() *ResponseStatusProvider[M] {
+func WithForbiddenResponse[M common.RequestableModel]() *ResponseStatusProvider[M] {
 	return &ResponseStatusProvider[M]{status: ForbiddenResponseStatus, result: nil}
 }
 
 // WithInvalidResponse This method returns a new ResponseStatusProvider using the given model, and the InvalidResponseStatus value.
-func WithInvalidResponse[M RequestableModel]() *ResponseStatusProvider[M] {
+func WithInvalidResponse[M common.RequestableModel]() *ResponseStatusProvider[M] {
 	return &ResponseStatusProvider[M]{status: InvalidResponseStatus, result: nil}
 }
 
@@ -92,8 +94,5 @@ func (r *ResponseStatusProvider[M]) Status() byte {
 
 // Result This method returns the response's model.
 func (r *ResponseStatusProvider[M]) Result() *M {
-	if r.result == nil {
-		return nil
-	}
 	return r.result
 }

@@ -31,6 +31,14 @@ import (
 	"viewer/main/utils"
 )
 
+// FormatBooleanValue This function returns a readable string that correspond to the value for the given boolean.
+func FormatBooleanValue(value bool) string {
+	if value {
+		return "Yes"
+	}
+	return "No"
+}
+
 // GithubRepositoryModel This struct represents a requested repository with all its information.
 type GithubRepositoryModel struct {
 	Owner struct {

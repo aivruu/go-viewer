@@ -29,6 +29,9 @@ import (
 // DefaultClient A default http.Client used with functions that doesn't require a http.Client object.
 var DefaultClient = &http.Client{}
 
+// ResponseOkStatus Correspond to status-code provided if the request was accepted and a response was provided.
+const ResponseOkStatus = 200
+
 // RequestModel This interface is used to proportionate request-method to get information for models-serialization.
 type RequestModel[M common.RequestableModel] interface {
 	// RequestWith This method request to the URL using the given http.Client and returns the model with the requested information

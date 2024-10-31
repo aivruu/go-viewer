@@ -26,10 +26,7 @@ import (
 	"io"
 	"net/http"
 	"viewer/main/async"
-	"viewer/main/common"
 	vhttp "viewer/main/http"
-	status "viewer/main/http/response"
-	"viewer/main/repository/codec"
 )
 
 // AsyncResponseWith This function makes a request to the given url using the given http.Client, and returns an async.Future,
@@ -88,35 +85,4 @@ func asyncResponse(url string) async.Future[vhttp.ResponseModel] {
 		}(&resp.Body)
 		return vhttp.NewResponseModel(string(read), resp.StatusCode, &resp.Body)
 	})
-}
-
-// VerifyAndProvideResponse This function verifies the given response (if it is available), and uses their status-code to verify
-// and provide a http.ResponseStatusProvider depending on given response-code.
-//
-// Additionally, if the response is valid, the model will be used to execute the given consumer.
-func VerifyAndProvideResponse[M common.RequestableModel](resp *vhttp.ResponseModel, consumer *common.RequestConsumer[M], codecProvider codec.Provider[M]) *vhttp.ResponseStatusProvider[M] {
-	if resp == nil {
-		return vhttp.WithUnauthorizedResponse[M]()
-	}
-	switch resp.StatusCode() {
-	case status.NotFound:
-		return vhttp.WithInvalidResponse[M]()
-	case status.Unauthorized:
-		return vhttp.WithUnauthorizedResponse[M]()
-	case status.MovedPermanently:
-		return vhttp.WithMovedPermanentlyResponse[M]()
-	case status.Forbidden:
-		return vhttp.WithForbiddenResponse[M]()
-	case status.OK:
-		model := codecProvider.From(resp.JSON())
-		if model == nil {
-			return vhttp.WithInvalidResponse[M]()
-		}
-		if consumer != nil {
-			(*consumer)(model)
-		}
-		return vhttp.WithValidResponse(model)
-	default:
-		return vhttp.WithInvalidResponse[M]()
-	}
 }

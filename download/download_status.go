@@ -24,7 +24,8 @@ package download
 const (
 	AssetDownloadedStatus    = byte(0)   // Asset was downloaded.
 	UnknownAssetStatus       = byte(1)   // The asset wasn't downloaded, may be unknown.
-	AssetDownloadErrorStatus = byte(2)   // The asset couldn't be downloaded.
+	InvalidAssetUrlStatus    = byte(2)   // The asset's URL is not valid.
+	AssetDownloadErrorStatus = byte(3)   // The asset couldn't be downloaded.
 	UnknownAssetDefaultSize  = int64(0)  // Used for non-downloaded (zero read bytes) assets.
 	InvalidAssetDefaultSize  = int64(-1) // Used for failed-downloaded assets.
 )
@@ -45,6 +46,12 @@ func WithAssetDownload(result int64) *DownloadingStatusProvider {
 // and providing the UnknownAssetStatus status.
 func WithUnknownAsset() *DownloadingStatusProvider {
 	return &DownloadingStatusProvider{status: UnknownAssetStatus, result: UnknownAssetDefaultSize}
+}
+
+// WithInvalidUrl This method creates a new DownloadingStatusProvider using the InvalidAssetDefaultSize for result-value,
+// and using the InvalidAssetUrlStatus status.
+func WithInvalidUrl() *DownloadingStatusProvider {
+	return &DownloadingStatusProvider{status: InvalidAssetUrlStatus, result: InvalidAssetDefaultSize}
 }
 
 // WithDownloadError This method creates a new DownloadingStatusProvider using the InvalidAssetDefaultSize for result-value,
@@ -71,6 +78,11 @@ func (d *DownloadingStatusProvider) Downloaded() bool {
 // Unknown This method return whether the status-code is UnknownAssetStatus.
 func (d *DownloadingStatusProvider) Unknown() bool {
 	return d.status == UnknownAssetStatus
+}
+
+// InvalidUrl This method return whether the status-code is InvalidAssetUrlStatus.
+func (d *DownloadingStatusProvider) InvalidUrl() bool {
+	return d.status == InvalidAssetUrlStatus
 }
 
 // Error This method return whether the status-code is AssetDownloadErrorStatus.

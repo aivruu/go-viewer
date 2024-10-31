@@ -27,7 +27,6 @@ import (
 	http2 "net/http"
 	"viewer/main/common"
 	"viewer/main/http"
-	"viewer/main/http/response"
 	"viewer/main/repository/codec"
 	"viewer/main/utils"
 )
@@ -74,10 +73,7 @@ func NewRepositoryRequest(url string) *RequestRepositoryModelImpl {
 
 func (r *RequestRepositoryModelImpl) RequestWith(client *http2.Client) *GithubRepositoryModel {
 	resp := utils.Response(client, r.url)
-	if resp == nil {
-		return nil
-	}
-	if resp.StatusCode() != response.OK {
+	if resp == nil || resp.StatusCode() != http.ResponseOkStatus {
 		return nil
 	}
 	return repositoryCodec.From(resp.JSON())
@@ -85,13 +81,10 @@ func (r *RequestRepositoryModelImpl) RequestWith(client *http2.Client) *GithubRe
 
 func (r *RequestRepositoryModelImpl) RequestWithAndThen(client *http2.Client, consumer common.RequestConsumer[GithubRepositoryModel]) *GithubRepositoryModel {
 	resp := utils.Response(client, r.url)
-	if resp == nil {
+	if resp == nil || resp.StatusCode() != http.ResponseOkStatus {
 		return nil
 	}
-	if resp.StatusCode() != response.OK {
-		return nil
-	}
-	repository := repositoryCodec.From(resp.JSON()) // Obtain result from async.Future pass the received JSON (body).
+	repository := repositoryCodec.From(resp.JSON())
 	if repository != nil {
 		consumer(repository)
 	}

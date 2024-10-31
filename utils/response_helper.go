@@ -35,10 +35,12 @@ func asyncResponseWith(client *http.Client, url string) async.Future[vhttp.Respo
 	return async.NewFuture(func() *vhttp.ResponseModel {
 		resp, err := client.Get(url)
 		if err != nil {
+			fmt.Println("Error during request: ", err)
 			return nil
 		}
 		read, err := io.ReadAll(resp.Body)
 		if err != nil {
+			fmt.Println("Error during reading: ", err)
 			return nil
 		}
 		// Close body after reading.
@@ -70,10 +72,12 @@ func asyncResponse(url string) async.Future[vhttp.ResponseModel] {
 	return async.NewFuture(func() *vhttp.ResponseModel {
 		resp, err := vhttp.DefaultClient.Get(url)
 		if err != nil {
+			fmt.Println("Error during request: ", err)
 			return nil
 		}
 		read, err := io.ReadAll(resp.Body)
 		if err != nil {
+			fmt.Println("Error during reading: ", err)
 			return nil
 		}
 		// Close body after reading.
@@ -84,5 +88,18 @@ func asyncResponse(url string) async.Future[vhttp.ResponseModel] {
 			}
 		}(&resp.Body)
 		return vhttp.NewResponseModel(string(read), resp.StatusCode, &resp.Body)
+	})
+}
+
+// OriginalResponse This function makes an async request to the given url, and returns the built-in http.Response object,
+// and not a http.ResponseModel.
+func OriginalResponse(url string) async.Future[http.Response] {
+	return async.NewFuture(func() *http.Response {
+		resp, err := vhttp.DefaultClient.Get(url)
+		if err != nil {
+			fmt.Println("Error during request: ", err)
+			return nil
+		}
+		return resp
 	})
 }

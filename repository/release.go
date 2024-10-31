@@ -29,7 +29,6 @@ import (
 	"strings"
 	"viewer/main/common"
 	"viewer/main/http"
-	"viewer/main/http/response"
 	"viewer/main/repository/codec"
 	"viewer/main/repository/operator"
 	"viewer/main/utils"
@@ -55,15 +54,13 @@ type Asset struct {
 // Compare This method compares the given version-number with this release's tag-name (as int) using the specified operator-type
 // for the comparison, and return a bool as operation's result.
 func (r *GithubReleaseModel) Compare(operatorType operator.Operator, targetVersion int) bool {
-	if len(r.TagName) == 0 {
-		return false
-	}
-	versionWithoutDots := strings.Replace(r.TagName, ".", "", -1)
+	var versionFormatted string
 	if r.TagName[0] == 'v' {
-		versionWithoutDots = r.TagName[1:]
+		versionFormatted = r.TagName[1:]
 	} else {
-		versionWithoutDots = r.TagName
+		versionFormatted = r.TagName
 	}
+	versionWithoutDots := strings.Replace(versionFormatted, ".", "", 3)
 	version, _ := strconv.Atoi(versionWithoutDots)
 	switch operatorType {
 	case operator.Equal:
@@ -98,10 +95,7 @@ func NewReleaseRequest(url string) *RequestReleaseModelImpl {
 
 func (r *RequestReleaseModelImpl) RequestWith(client *http2.Client) *GithubReleaseModel {
 	resp := utils.Response(client, r.url)
-	if resp == nil {
-		return nil
-	}
-	if resp.StatusCode() != response.OK {
+	if resp == nil || resp.StatusCode() != http.ResponseOkStatus {
 		return nil
 	}
 	return releaseCodec.From(resp.JSON())
@@ -109,10 +103,7 @@ func (r *RequestReleaseModelImpl) RequestWith(client *http2.Client) *GithubRelea
 
 func (r *RequestReleaseModelImpl) RequestWithAndThen(client *http2.Client, consumer common.RequestConsumer[GithubReleaseModel]) *GithubReleaseModel {
 	resp := utils.Response(client, r.url)
-	if resp == nil {
-		return nil
-	}
-	if resp.StatusCode() != response.OK {
+	if resp == nil || resp.StatusCode() != http.ResponseOkStatus {
 		return nil
 	}
 	release := releaseCodec.From(resp.JSON()) // Obtain result from async.Future pass the received JSON (body).

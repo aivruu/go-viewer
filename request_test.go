@@ -4,6 +4,7 @@ import (
 	"testing"
 	"viewer/main/http"
 	"viewer/main/repository"
+	"viewer/main/repository/operator"
 )
 
 func TestReleaseRequest(t *testing.T) {
@@ -15,7 +16,9 @@ func TestReleaseRequest(t *testing.T) {
 	} else {
 		t.Logf("%s - %s - %s", release.Author.Login, release.Name, release.TagName)
 		t.Log()
+		t.Logf("%t", release.Compare(operator.Less, 134))
 		for _, asset := range release.Assets {
+			t.Log()
 			t.Logf("Asset: %s - %s", asset.Name, asset.Url)
 			t.Log()
 		}

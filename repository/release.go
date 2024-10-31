@@ -28,6 +28,7 @@ import (
 	"strconv"
 	"strings"
 	"viewer/main/common"
+	"viewer/main/download"
 	"viewer/main/http"
 	"viewer/main/repository/codec"
 	"viewer/main/repository/operator"
@@ -46,9 +47,24 @@ type GithubReleaseModel struct {
 	common.RequestableModel
 }
 
+// Asset This struct stores a release's asset's name and url to be used for downloading later.
 type Asset struct {
 	Name string `json:"name"`
 	Url  string `json:"browser_download_url"`
+}
+
+// Download This method tries to download the asset-specified for this release from the array of assets into specified directory,
+// and will return a boolean value whether the asset-number is valid, and asset was downloaded correctly.
+func (r *GithubReleaseModel) Download(directory string, assetNum int) int64 {
+	if assetNum < 0 {
+		return download.UnknownAssetDefaultSize
+	}
+	assetsAmount := len(r.Assets)
+	if assetsAmount == 0 || assetNum >= assetsAmount {
+		return download.InvalidAssetDefaultSize
+	}
+	asset := r.Assets[assetNum]
+	return download.From(directory, asset.Name, asset.Url).Result()
 }
 
 // Compare This method compares the given version-number with this release's tag-name (as int) using the specified operator-type

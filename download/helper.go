@@ -25,13 +25,29 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"path/filepath"
+	"regexp"
+	"strings"
 	"viewer/main/utils"
 )
 
+func validGithubUrl(url string) bool {
+	return strings.HasPrefix(url, "https://github.com/") || strings.HasPrefix(url, "https://api.github.com/")
+}
+
+func sanitizeFileName(fileName string) string {
+	regex := regexp.MustCompile(`[^w\-.]`)
+	return regex.ReplaceAllString(fileName, "_")
+}
+
 // From This function downloads the content from the given url into the specified file-name, and returns a DownloadStatusProvider.
-func From(fileName string, url string) *DownloadingStatusProvider {
-	file, err := os.Create(fileName)
+func From(directory string, fileName string, url string) *DownloadingStatusProvider {
+	if !validGithubUrl(url) {
+		return WithInvalidUrl()
+	}
+	file, err := os.Create(filepath.Join(directory, sanitizeFileName(fileName)))
 	if err != nil {
+		fmt.Println("Error during file creation: ", err)
 		return WithDownloadError()
 	}
 	defer func(File *os.File) {
@@ -40,22 +56,14 @@ func From(fileName string, url string) *DownloadingStatusProvider {
 			fmt.Println("Error during File closing: ", err)
 		}
 	}(file)
-	resp := utils.Response(nil, url)
+	request := utils.OriginalResponse(url)
+	resp := request.Get()
 	if resp == nil {
 		return WithDownloadError()
 	}
-	body := resp.Body()
-	if body == nil {
-		return WithDownloadError()
-	}
-	defer func(Body *io.ReadCloser) {
-		err := (*Body).Close()
-		if err != nil {
-			fmt.Println("Error during Body closing: ", err)
-		}
-	}(body)
-	size, err := io.Copy(file, *body)
+	size, err := io.Copy(file, resp.Body)
 	if err != nil {
+		fmt.Println("Error body's information copying into file: ", err)
 		return WithDownloadError()
 	}
 	if size == 0 {

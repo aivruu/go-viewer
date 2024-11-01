@@ -33,24 +33,11 @@ import (
 
 func main() {
 	argsAmount := len(os.Args)
-	if argsAmount < 2 {
-		fmt.Println("Missing arguments.")
-		return
-	}
 	if argsAmount < 3 || argsAmount > 6 {
-		fmt.Println("Invalid arguments amount, four for release-info, five for repository.")
+		fmt.Println("Invalid arguments amount, four for release-info | six for assets download, and two for repository.")
 		return
 	}
-	if argsAmount == 4 {
-		releaseRequest := repository.NewReleaseRequest(ForRelease(os.Args[1], os.Args[2], os.Args[3]))
-		model := http.Request(releaseRequest)
-		if model == nil {
-			fmt.Println("Failed to request the release for this repository.")
-			return
-		}
-		printReleaseInformation(model)
-		return
-	} else if argsAmount == 6 && strings.Contains(os.Args[3], ".") {
+	if (argsAmount == 6) && (strings.Contains(os.Args[3], ".") || strings.Contains(os.Args[3], "latest")) {
 		releaseRequest := repository.NewReleaseRequest(ForRelease(os.Args[1], os.Args[2], os.Args[3]))
 		model := http.Request(releaseRequest)
 		if model == nil {
@@ -68,6 +55,25 @@ func main() {
 			}
 			downloadAsset(os.Args[5], model, index-1)
 		}
+		return
+	}
+	if argsAmount == 4 {
+		var releaseRequest *repository.RequestReleaseModelImpl
+		if os.Args[3] == "latest" {
+			releaseRequest = repository.NewReleaseRequest(ForRelease(os.Args[1], os.Args[2], "latest"))
+		} else {
+			releaseRequest = repository.NewReleaseRequest(ForRelease(os.Args[1], os.Args[2], os.Args[3]))
+		}
+		if releaseRequest == nil {
+			fmt.Println("Failed to create the request.")
+			return
+		}
+		model := http.Request(releaseRequest)
+		if model == nil {
+			fmt.Println("Failed to request the release for this repository.")
+			return
+		}
+		printReleaseInformation(model)
 		return
 	}
 	repositoryRequest := repository.NewRepositoryRequest(ForRepository(os.Args[1], os.Args[2]))

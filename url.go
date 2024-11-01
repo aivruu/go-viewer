@@ -21,7 +21,10 @@
 
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"strings"
+)
 
 const (
 	GithubApiUrl        = "https://api.github.com/repos/%s/%s"
@@ -37,5 +40,8 @@ func ForRepository(author string, repository string) string {
 // ForRelease This function formats the GithubApiReleaseUrl to include the author, repository and tag specified to create a valid
 // url for a request.
 func ForRelease(author string, repository string, tag string) string {
+	if tag == "latest" {
+		return fmt.Sprintf(strings.Replace(GithubApiReleaseUrl, "tags/", "", 1), author, repository, "latest")
+	}
 	return fmt.Sprintf(GithubApiReleaseUrl, author, repository, tag)
 }

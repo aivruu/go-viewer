@@ -26,7 +26,6 @@ import (
 	"io"
 	"os"
 	"path/filepath"
-	"regexp"
 	"strings"
 	"viewer/main/utils"
 )
@@ -35,17 +34,12 @@ func validGithubUrl(url string) bool {
 	return strings.HasPrefix(url, "https://github.com/") || strings.HasPrefix(url, "https://api.github.com/")
 }
 
-func sanitizeFileName(fileName string) string {
-	regex := regexp.MustCompile(`[^w\-.]`)
-	return regex.ReplaceAllString(fileName, "_")
-}
-
 // From This function downloads the content from the given url into the specified file-name, and returns a DownloadStatusProvider.
 func From(directory string, fileName string, url string) *DownloadingStatusProvider {
 	if !validGithubUrl(url) {
 		return WithInvalidUrl()
 	}
-	file, err := os.Create(filepath.Join(directory, sanitizeFileName(fileName)))
+	file, err := os.Create(filepath.Join(directory, fileName))
 	if err != nil {
 		fmt.Println("Error during file creation: ", err)
 		return WithDownloadError()

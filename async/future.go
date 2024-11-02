@@ -47,7 +47,7 @@ func NewFuture[T any](fn func() *T) Future[T] {
 	return f
 }
 
-// Get This method returns this Future's pointer (result) when it becomes available.
+// Get This method returns this Future's channel's value (result) when it becomes available.
 func (f *Future[T]) Get() *T {
 	value := <-f.result
 	return &value

@@ -31,8 +31,8 @@ type ResponseModel struct {
 }
 
 // NewResponseModel This function creates a new ResponseModel object with the given parameters.
-func NewResponseModel(json string, statusCode int, body *io.ReadCloser) *ResponseModel {
-	return &ResponseModel{json: json, statusCode: statusCode, body: *body}
+func NewResponseModel(json string, statusCode int, body io.ReadCloser) ResponseModel {
+	return ResponseModel{json: json, statusCode: statusCode, body: body}
 }
 
 // JSON This method returns the json-body for this response.
@@ -46,6 +46,6 @@ func (r *ResponseModel) StatusCode() int {
 }
 
 // Body This method returns the Body for this response.
-func (r *ResponseModel) Body() *io.ReadCloser {
-	return &r.body
+func (r *ResponseModel) Body() io.ReadCloser {
+	return r.body
 }

@@ -44,28 +44,32 @@ func From(directory string, fileName string, url string) *DownloadingStatusProvi
 		fmt.Println("Error during file creation: ", err)
 		return WithDownloadError()
 	}
+	// [os.File] object closing and error handling.
 	defer func(File *os.File) {
 		err := File.Close()
 		if err != nil {
 			fmt.Println("Error during File closing: ", err)
 		}
 	}(file)
+	// Make request to the given url and get the [Response] object.
 	request := utils.OriginalResponse(url)
 	resp := request.Get()
 	if resp == nil {
 		return WithDownloadError()
 	}
-	size, err := io.Copy(file, resp.Body)
+	// Store body to avoid copying it while accessing.
+	body := resp.Body
+	size, err := io.Copy(file, body)
 	if err != nil {
 		fmt.Println("Error body's information copying into file: ", err)
 		return WithDownloadError()
 	}
-	defer func(Body io.ReadCloser) {
-		err := Body.Close()
+	defer func(Body *io.ReadCloser) {
+		err := (*Body).Close()
 		if err != nil {
 			fmt.Println("Error during body closing: ", err)
 		}
-	}(resp.Body)
+	}(&body)
 	if size == 0 {
 		return WithUnknownAsset()
 	}

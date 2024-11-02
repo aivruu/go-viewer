@@ -26,9 +26,6 @@ import (
 	"viewer/main/common"
 )
 
-// DefaultClient A default http.Client used with functions that doesn't require a http.Client object.
-var DefaultClient = &http.Client{}
-
 // ResponseOkStatus Correspond to status-code provided if the request was accepted and a response was provided.
 const ResponseOkStatus = 200
 

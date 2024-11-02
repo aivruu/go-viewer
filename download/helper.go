@@ -35,7 +35,7 @@ func validGithubUrl(url string) bool {
 }
 
 // From This function downloads the content from the given url into the specified file-name, and returns a DownloadStatusProvider.
-func From(directory string, fileName string, url string) *DownloadingStatusProvider {
+func From(directory string, fileName string, url string) DownloadingStatusProvider {
 	if !validGithubUrl(url) {
 		return WithInvalidUrl()
 	}

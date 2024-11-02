@@ -23,6 +23,7 @@ package main
 
 import (
 	"testing"
+	"time"
 	"viewer/main/http"
 	"viewer/main/repository"
 	"viewer/main/repository/operator"
@@ -31,7 +32,7 @@ import (
 func TestReleaseRequest(t *testing.T) {
 	// Request test to repository's latest release.
 	releaseRequest := repository.NewReleaseRequest(ForRelease("aivruu", "repo-viewer", "v3.4.7"))
-	release := http.Request(releaseRequest)
+	release := http.Request(releaseRequest, 5*time.Second)
 	if release == nil {
 		t.Error("Failed to request the release for this repository.")
 	} else {
@@ -57,7 +58,7 @@ func TestRepositoryRequest(t *testing.T) {
 		t.Log(Model.CanFork)
 		t.Log(Model.Stars)
 		t.Log(Model.Language)
-	})
+	}, 5*time.Second)
 	if model == nil {
 		t.Log("Failed to request the repository.")
 	}

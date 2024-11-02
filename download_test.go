@@ -23,6 +23,7 @@ package main
 
 import (
 	"testing"
+	"time"
 	"viewer/main/download"
 	"viewer/main/http"
 	"viewer/main/repository"
@@ -30,12 +31,12 @@ import (
 
 func TestAssetDownload(t *testing.T) {
 	releaseRequest := repository.NewReleaseRequest(ForRelease("aivruu", "repo-viewer", "v3.4.7"))
-	release := http.Request(releaseRequest)
+	release := http.Request(releaseRequest, 5*time.Second)
 	if release == nil {
 		t.Error("Failed to request the release for this repository.")
 		return
 	}
-	read := release.Download("", 0) // Download the first asset.
+	read := release.Download("", 0) // Download the first asset at this directory.
 	if read == download.InvalidAssetDefaultSize || read == download.UnknownAssetDefaultSize {
 		t.Error("Failed to download the asset.")
 		return

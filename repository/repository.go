@@ -25,6 +25,7 @@ import (
 	json2 "encoding/json"
 	"fmt"
 	http2 "net/http"
+	"time"
 	"viewer/main/common"
 	"viewer/main/http"
 	"viewer/main/repository/codec"
@@ -70,8 +71,7 @@ var repositoryCodec = CodecRepository{}
 // RequestRepositoryModelImpl This codec.Provider implementation is used to handle requests for repositories.
 type RequestRepositoryModelImpl struct {
 	http.RequestModel[GithubRepositoryModel]
-	responseModel *http.ResponseModel
-	url           string
+	url string
 }
 
 // NewRepositoryRequest This function creates a new RequestReleaseModelImpl with the given url.
@@ -79,24 +79,30 @@ func NewRepositoryRequest(url string) *RequestRepositoryModelImpl {
 	return &RequestRepositoryModelImpl{url: url}
 }
 
-func (r *RequestRepositoryModelImpl) RequestWith(client *http2.Client) *GithubRepositoryModel {
-	resp := utils.Response(client, r.url)
+func (r *RequestRepositoryModelImpl) RequestWith(client *http2.Client, timeout time.Duration) *GithubRepositoryModel {
+	resp := utils.Response(http.ValidateAndModifyTimeout(client, timeout), r.url)
 	if resp == nil || resp.StatusCode() != http.ResponseOkStatus {
 		return nil
 	}
-	return repositoryCodec.From(resp.JSON())
+	model, err := repositoryCodec.From(resp.JSON())
+	if err != nil {
+		fmt.Println("Error during repository-model deserialization: ", err)
+	}
+	return model
 }
 
-func (r *RequestRepositoryModelImpl) RequestWithAndThen(client *http2.Client, consumer common.RequestConsumer[GithubRepositoryModel]) *GithubRepositoryModel {
-	resp := utils.Response(client, r.url)
+func (r *RequestRepositoryModelImpl) RequestWithAndThen(client *http2.Client, consumer common.RequestConsumer[GithubRepositoryModel], timeout time.Duration) *GithubRepositoryModel {
+	resp := utils.Response(http.ValidateAndModifyTimeout(client, timeout), r.url)
 	if resp == nil || resp.StatusCode() != http.ResponseOkStatus {
 		return nil
 	}
-	repository := repositoryCodec.From(resp.JSON())
-	if repository != nil {
-		consumer(repository)
+	model, err := repositoryCodec.From(resp.JSON())
+	if err == nil {
+		consumer(model)
+	} else {
+		fmt.Println("Error during repository-model deserialization: ", err)
 	}
-	return repository
+	return model
 }
 
 // CodecRepository This struct is an implementation used for repository.GithubRepositoryModel deserialization.
@@ -106,11 +112,11 @@ type CodecRepository struct {
 
 // From This function's override is used to handle and deserialize correctly the json's information to create a new
 // repository.GithubRepositoryModel object.
-func (r *CodecRepository) From(json string) *GithubRepositoryModel {
+func (r *CodecRepository) From(json string) (*GithubRepositoryModel, error) {
 	var repository GithubRepositoryModel
 	err := json2.Unmarshal([]byte(json), &repository)
 	if err != nil {
-		fmt.Println(err)
+		return nil, err
 	}
-	return &repository
+	return &repository, nil
 }

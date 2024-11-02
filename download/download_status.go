@@ -38,26 +38,26 @@ type DownloadingStatusProvider struct {
 
 // WithAssetDownload This method creates a new DownloadingStatusProvider using the given amount of read-bytes, and the
 // AssetDownloadedStatus status.
-func WithAssetDownload(result int64) *DownloadingStatusProvider {
-	return &DownloadingStatusProvider{status: AssetDownloadedStatus, result: result}
+func WithAssetDownload(result int64) DownloadingStatusProvider {
+	return DownloadingStatusProvider{status: AssetDownloadedStatus, result: result}
 }
 
 // WithUnknownAsset This method creates a new DownloadingStatusProvider using the UnknownAssetDefaultSize for result-value,
 // and providing the UnknownAssetStatus status.
-func WithUnknownAsset() *DownloadingStatusProvider {
-	return &DownloadingStatusProvider{status: UnknownAssetStatus, result: UnknownAssetDefaultSize}
+func WithUnknownAsset() DownloadingStatusProvider {
+	return DownloadingStatusProvider{status: UnknownAssetStatus, result: UnknownAssetDefaultSize}
 }
 
 // WithInvalidUrl This method creates a new DownloadingStatusProvider using the InvalidAssetDefaultSize for result-value,
 // and using the InvalidAssetUrlStatus status.
-func WithInvalidUrl() *DownloadingStatusProvider {
-	return &DownloadingStatusProvider{status: InvalidAssetUrlStatus, result: InvalidAssetDefaultSize}
+func WithInvalidUrl() DownloadingStatusProvider {
+	return DownloadingStatusProvider{status: InvalidAssetUrlStatus, result: InvalidAssetDefaultSize}
 }
 
 // WithDownloadError This method creates a new DownloadingStatusProvider using the InvalidAssetDefaultSize for result-value,
 // and using the AssetDownloadErrorStatus status.
-func WithDownloadError() *DownloadingStatusProvider {
-	return &DownloadingStatusProvider{status: AssetDownloadErrorStatus, result: InvalidAssetDefaultSize}
+func WithDownloadError() DownloadingStatusProvider {
+	return DownloadingStatusProvider{status: AssetDownloadErrorStatus, result: InvalidAssetDefaultSize}
 }
 
 // Status This method returns this instance's status-code.

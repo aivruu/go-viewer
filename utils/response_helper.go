@@ -25,41 +25,34 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"time"
 	"viewer/main/async"
 	vhttp "viewer/main/http"
 )
 
-// AsyncResponseWith This function makes a request to the given url using the given http.Client, if a Client instance is not
-// provided, will use the default http.DefaultClient for the request. It will return an async.Future, this object's function
-// may return a http.ResponseModel, or nil depending on operation success.
+// AsyncResponseWith This function makes a request to the given url using the given http.Client and will return an
+// async.Future, this object's function may return a http.ResponseModel, or null depending on operation success.
 func asyncResponse(client *http.Client, url string) async.Future[vhttp.ResponseModel] {
 	return async.NewFuture(func() *vhttp.ResponseModel {
-		var resp *http.Response
-		var err error
-		// Verify if a specific [Client] instance was provided.
-		if client == nil {
-			resp, err = http.Get(url) // Use default client instance.
-		} else {
-			resp, err = client.Get(url)
-		}
+		resp, err := client.Get(url)
 		if err != nil {
 			fmt.Println("Error during request: ", err)
 			return nil
 		}
-		body := resp.Body
-		read, err := io.ReadAll(body)
+		read, err := io.ReadAll(resp.Body)
 		if err != nil {
 			fmt.Println("Error during reading: ", err)
 			return nil
 		}
 		// Close body after reading.
-		defer func(Body *io.ReadCloser) {
-			err := (*Body).Close()
+		defer func(Body io.ReadCloser) {
+			err := Body.Close()
 			if err != nil {
 				fmt.Println("Error during Body closing: ", err)
 			}
-		}(&body)
-		return vhttp.NewResponseModel(string(read), resp.StatusCode, &body)
+		}(resp.Body)
+		respModel := vhttp.NewResponseModel(string(read), resp.StatusCode, resp.Body)
+		return &respModel
 	})
 }
 
@@ -69,6 +62,17 @@ func Response(client *http.Client, url string) *vhttp.ResponseModel {
 	f := asyncResponse(client, url)
 	// Return [ResponseModel] object when available.
 	return f.Get()
+}
+
+// ValidateAndModifyTimeout This function validates the given client and then modifies the client's timeout. If the http.Client
+// instance is null or is the http.DefaultClient reference, the function will return the DefaultClient instance instead,
+// otherwise, it will modify the client's timeout and return the same client instance (no copies).
+func ValidateAndModifyTimeout(client *http.Client, timeout time.Duration) *http.Client {
+	if (client == nil) || client == http.DefaultClient {
+		return vhttp.DefaultClient
+	}
+	client.Timeout = timeout
+	return client
 }
 
 // OriginalResponse This function makes an async request to the given url, and returns the built-in http.Response object,

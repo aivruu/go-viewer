@@ -27,6 +27,7 @@ import (
 	http2 "net/http"
 	"strconv"
 	"strings"
+	"time"
 	"viewer/main/common"
 	"viewer/main/download"
 	"viewer/main/http"
@@ -64,7 +65,8 @@ func (r *GithubReleaseModel) Download(directory string, assetNum int) int64 {
 		return download.InvalidAssetDefaultSize
 	}
 	asset := r.Assets[assetNum]
-	return download.From(directory, asset.Name, asset.Url).Result()
+	downloadStatus := download.From(directory, asset.Name, asset.Url)
+	return downloadStatus.Result()
 }
 
 // Compare This method compares the given version-number with this release's tag-name (as int) using the specified operator-type
@@ -100,8 +102,7 @@ var releaseCodec = CodecRelease{}
 // RequestReleaseModelImpl This codec.Provider implementation is used to handle requests for repositories' releases.
 type RequestReleaseModelImpl struct {
 	http.RequestModel[GithubReleaseModel]
-	responseModel *http.ResponseModel
-	url           string
+	url string
 }
 
 // NewReleaseRequest This function creates a new RequestReleaseModelImpl with the given url.
@@ -109,24 +110,30 @@ func NewReleaseRequest(url string) *RequestReleaseModelImpl {
 	return &RequestReleaseModelImpl{url: url}
 }
 
-func (r *RequestReleaseModelImpl) RequestWith(client *http2.Client) *GithubReleaseModel {
-	resp := utils.Response(client, r.url)
+func (r *RequestReleaseModelImpl) RequestWith(client *http2.Client, timeout time.Duration) *GithubReleaseModel {
+	resp := utils.Response(http.ValidateAndModifyTimeout(client, timeout), r.url)
 	if resp == nil || resp.StatusCode() != http.ResponseOkStatus {
 		return nil
 	}
-	return releaseCodec.From(resp.JSON())
+	model, err := releaseCodec.From(resp.JSON())
+	if err != nil {
+		fmt.Println("Error during release-model deserialization: ", err)
+	}
+	return model
 }
 
-func (r *RequestReleaseModelImpl) RequestWithAndThen(client *http2.Client, consumer common.RequestConsumer[GithubReleaseModel]) *GithubReleaseModel {
-	resp := utils.Response(client, r.url)
+func (r *RequestReleaseModelImpl) RequestWithAndThen(client *http2.Client, consumer common.RequestConsumer[GithubReleaseModel], timeout time.Duration) *GithubReleaseModel {
+	resp := utils.Response(http.ValidateAndModifyTimeout(client, timeout), r.url)
 	if resp == nil || resp.StatusCode() != http.ResponseOkStatus {
 		return nil
 	}
-	release := releaseCodec.From(resp.JSON()) // Obtain result from async.Future pass the received JSON (body).
-	if release != nil {
-		consumer(release)
+	model, err := releaseCodec.From(resp.JSON()) // Obtain result from async.Future pass the received JSON (body).
+	if err != nil {
+		consumer(model)
+	} else {
+		fmt.Println("Error during release-model deserialization: ", err)
 	}
-	return release
+	return model
 }
 
 // CodecRelease This struct is an implementation used for repository.GithubReleaseModel deserialization.
@@ -136,11 +143,11 @@ type CodecRelease struct {
 
 // From This function's override is used to handle and deserialize correctly the json's information to create a new
 // repository.GithubReleaseModel object.
-func (c *CodecRelease) From(json string) *GithubReleaseModel {
+func (c *CodecRelease) From(json string) (*GithubReleaseModel, error) {
 	var release GithubReleaseModel
 	err := json2.Unmarshal([]byte(json), &release)
 	if err != nil {
-		fmt.Println(err)
+		return nil, err
 	}
-	return &release
+	return &release, nil
 }

@@ -38,7 +38,8 @@ func asyncResponseWith(client *http.Client, url string) async.Future[vhttp.Respo
 			fmt.Println("Error during request: ", err)
 			return nil
 		}
-		read, err := io.ReadAll(resp.Body)
+		body := resp.Body
+		read, err := io.ReadAll(body)
 		if err != nil {
 			fmt.Println("Error during reading: ", err)
 			return nil
@@ -49,8 +50,8 @@ func asyncResponseWith(client *http.Client, url string) async.Future[vhttp.Respo
 			if err != nil {
 				fmt.Println("Error during Body closing: ", err)
 			}
-		}(&resp.Body)
-		return vhttp.NewResponseModel(string(read), resp.StatusCode, &resp.Body)
+		}(&body)
+		return vhttp.NewResponseModel(string(read), resp.StatusCode, &body)
 	})
 }
 
@@ -75,7 +76,8 @@ func asyncResponse(url string) async.Future[vhttp.ResponseModel] {
 			fmt.Println("Error during request: ", err)
 			return nil
 		}
-		read, err := io.ReadAll(resp.Body)
+		body := resp.Body
+		read, err := io.ReadAll(body)
 		if err != nil {
 			fmt.Println("Error during reading: ", err)
 			return nil
@@ -86,8 +88,8 @@ func asyncResponse(url string) async.Future[vhttp.ResponseModel] {
 			if err != nil {
 				fmt.Println("Error during Body closing: ", err)
 			}
-		}(&resp.Body)
-		return vhttp.NewResponseModel(string(read), resp.StatusCode, &resp.Body)
+		}(&body)
+		return vhttp.NewResponseModel(string(read), resp.StatusCode, &body)
 	})
 }
 

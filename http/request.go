@@ -47,11 +47,11 @@ type RequestModel[M common.RequestableModel] interface {
 // Request This method realizes the same execution that RequestAndThen with the difference that this uses a default
 // http.Client to make the request.
 func Request[M common.RequestableModel](requestModel RequestModel[M]) *M {
-	return requestModel.RequestWith(DefaultClient)
+	return requestModel.RequestWith(nil)
 }
 
 // RequestAndThen This method realizes the same execution that RequestWithAndThen with the difference that this uses a
 // default http.Client to make the request.
 func RequestAndThen[M common.RequestableModel](requestModel RequestModel[M], consumer common.RequestConsumer[M]) *M {
-	return requestModel.RequestWithAndThen(DefaultClient, consumer)
+	return requestModel.RequestWithAndThen(nil, consumer)
 }

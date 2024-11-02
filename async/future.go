@@ -47,7 +47,8 @@ func NewFuture[T any](fn func() *T) Future[T] {
 	return f
 }
 
-// Get This method returns this Future's channel's value (result) when it becomes available.
+// Get This method returns this Future's channel's value (result) when it becomes available, this value may be nil depending on
+// the operation's use
 func (f *Future[T]) Get() *T {
 	value := <-f.result
 	return &value

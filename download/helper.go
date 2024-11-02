@@ -60,6 +60,12 @@ func From(directory string, fileName string, url string) *DownloadingStatusProvi
 		fmt.Println("Error body's information copying into file: ", err)
 		return WithDownloadError()
 	}
+	defer func(Body io.ReadCloser) {
+		err := Body.Close()
+		if err != nil {
+			fmt.Println("Error during body closing: ", err)
+		}
+	}(resp.Body)
 	if size == 0 {
 		return WithUnknownAsset()
 	}

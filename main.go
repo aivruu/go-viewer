@@ -33,13 +33,13 @@ import (
 
 func main() {
 	argsAmount := len(os.Args)
-	if argsAmount < 3 || argsAmount > 6 {
+	if argsAmount < 2 || argsAmount > 6 {
 		fmt.Println("Invalid arguments amount, four for release-info | six for assets download, and two for repository.")
 		return
 	}
 	if (argsAmount == 6) && (strings.Contains(os.Args[3], ".") || strings.Contains(os.Args[3], "latest")) {
 		releaseRequest := repository.NewReleaseRequest(ForRelease(os.Args[1], os.Args[2], os.Args[3]))
-		model := http.Request(releaseRequest)
+		model := http.Request(releaseRequest, 5)
 		if model == nil {
 			fmt.Println("Failed to request the release for asset download.")
 			return
@@ -68,7 +68,7 @@ func main() {
 			fmt.Println("Failed to create the request.")
 			return
 		}
-		model := http.Request(releaseRequest)
+		model := http.Request(releaseRequest, 5)
 		if model == nil {
 			fmt.Println("Failed to request the release for this repository.")
 			return
@@ -77,7 +77,7 @@ func main() {
 		return
 	}
 	repositoryRequest := repository.NewRepositoryRequest(ForRepository(os.Args[1], os.Args[2]))
-	model := http.Request(repositoryRequest)
+	model := http.Request(repositoryRequest, 5)
 	if model == nil {
 		fmt.Println("Failed to request the repository.")
 		return

@@ -80,7 +80,7 @@ func NewRepositoryRequest(url string) *RequestRepositoryModelImpl {
 }
 
 func (r *RequestRepositoryModelImpl) RequestWith(client *http2.Client, timeout time.Duration) *GithubRepositoryModel {
-	resp := utils.Response(http.ValidateAndModifyTimeout(client, timeout), r.url)
+	resp := utils.Response(utils.ValidateAndModifyTimeout(client, timeout), r.url)
 	if resp == nil || resp.StatusCode() != http.ResponseOkStatus {
 		return nil
 	}
@@ -92,7 +92,7 @@ func (r *RequestRepositoryModelImpl) RequestWith(client *http2.Client, timeout t
 }
 
 func (r *RequestRepositoryModelImpl) RequestWithAndThen(client *http2.Client, consumer common.RequestConsumer[GithubRepositoryModel], timeout time.Duration) *GithubRepositoryModel {
-	resp := utils.Response(http.ValidateAndModifyTimeout(client, timeout), r.url)
+	resp := utils.Response(utils.ValidateAndModifyTimeout(client, timeout), r.url)
 	if resp == nil || resp.StatusCode() != http.ResponseOkStatus {
 		return nil
 	}

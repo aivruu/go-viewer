@@ -111,7 +111,7 @@ func NewReleaseRequest(url string) *RequestReleaseModelImpl {
 }
 
 func (r *RequestReleaseModelImpl) RequestWith(client *http2.Client, timeout time.Duration) *GithubReleaseModel {
-	resp := utils.Response(http.ValidateAndModifyTimeout(client, timeout), r.url)
+	resp := utils.Response(utils.ValidateAndModifyTimeout(client, timeout), r.url)
 	if resp == nil || resp.StatusCode() != http.ResponseOkStatus {
 		return nil
 	}
@@ -123,7 +123,7 @@ func (r *RequestReleaseModelImpl) RequestWith(client *http2.Client, timeout time
 }
 
 func (r *RequestReleaseModelImpl) RequestWithAndThen(client *http2.Client, consumer common.RequestConsumer[GithubReleaseModel], timeout time.Duration) *GithubReleaseModel {
-	resp := utils.Response(http.ValidateAndModifyTimeout(client, timeout), r.url)
+	resp := utils.Response(utils.ValidateAndModifyTimeout(client, timeout), r.url)
 	if resp == nil || resp.StatusCode() != http.ResponseOkStatus {
 		return nil
 	}

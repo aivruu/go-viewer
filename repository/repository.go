@@ -21,15 +21,39 @@
 
 package repository
 
-import (
-	json2 "encoding/json"
-	"fmt"
-	http2 "net/http"
-	"time"
-	"viewer/main/common"
-	"viewer/main/http"
-	"viewer/main/repository/codec"
-	"viewer/main/utils"
+import "viewer/main/common"
+
+// GithubRepositoryModel This struct represents a requested repository with all its information.
+type (
+	GithubRepositoryModel struct {
+		Owner       Owner    `json:"owner"`
+		LicenseType License  `json:"license"`
+		Parent      Parent   `json:"parent"`
+		Name        string   `json:"name"`
+		Description string   `json:"description"`
+		Forked      bool     `json:"fork"`
+		CanFork     bool     `json:"allow_forking"`
+		Stars       int      `json:"stargazers_count"`
+		Forks       int      `json:"forks_count"`
+		Private     bool     `json:"private"`
+		Archived    bool     `json:"archived"`
+		Disabled    bool     `json:"disabled"`
+		Language    string   `json:"language"`
+		Topics      []string `json:"topics"`
+		common.RequestableModel
+	}
+
+	Owner struct {
+		Login string `json:"login"`
+	}
+
+	License struct {
+		Name string `json:"name"`
+	}
+
+	Parent struct {
+		Owner string `json:"owner"`
+	}
 )
 
 // FormatBooleanValue This function returns a readable string that correspond to the value for the given boolean.
@@ -38,85 +62,4 @@ func FormatBooleanValue(value bool) string {
 		return "Yes"
 	}
 	return "No"
-}
-
-// GithubRepositoryModel This struct represents a requested repository with all its information.
-type GithubRepositoryModel struct {
-	Owner struct {
-		Login string `json:"login"`
-	} `json:"owner"`
-	License struct {
-		Name string `json:"name"`
-	} `json:"license"`
-	Parent struct {
-		Owner string `json:"owner"`
-	} `json:"parent"`
-	Name        string   `json:"name"`
-	Description string   `json:"description"`
-	Forked      bool     `json:"fork"`
-	CanFork     bool     `json:"allow_forking"`
-	Stars       int      `json:"stargazers_count"`
-	Forks       int      `json:"forks_count"`
-	Private     bool     `json:"private"`
-	Archived    bool     `json:"archived"`
-	Disabled    bool     `json:"disabled"`
-	Language    string   `json:"language"`
-	Topics      []string `json:"topics"`
-	common.RequestableModel
-}
-
-// codec.Provider's implementation necessary for this type.
-var repositoryCodec = CodecRepository{}
-
-// RequestRepositoryModelImpl This codec.Provider implementation is used to handle requests for repositories.
-type RequestRepositoryModelImpl struct {
-	http.RequestModel[GithubRepositoryModel]
-	url string
-}
-
-// NewRepositoryRequest This function creates a new RequestReleaseModelImpl with the given url.
-func NewRepositoryRequest(url string) *RequestRepositoryModelImpl {
-	return &RequestRepositoryModelImpl{url: url}
-}
-
-func (r *RequestRepositoryModelImpl) RequestWith(client *http2.Client, timeout time.Duration) *GithubRepositoryModel {
-	resp := utils.Response(utils.ValidateAndModifyTimeout(client, timeout), r.url)
-	if resp == nil || resp.StatusCode() != http.ResponseOkStatus {
-		return nil
-	}
-	model, err := repositoryCodec.From(resp.JSON())
-	if err != nil {
-		fmt.Println("Error during repository-model deserialization: ", err)
-	}
-	return model
-}
-
-func (r *RequestRepositoryModelImpl) RequestWithAndThen(client *http2.Client, consumer common.RequestConsumer[GithubRepositoryModel], timeout time.Duration) *GithubRepositoryModel {
-	resp := utils.Response(utils.ValidateAndModifyTimeout(client, timeout), r.url)
-	if resp == nil || resp.StatusCode() != http.ResponseOkStatus {
-		return nil
-	}
-	model, err := repositoryCodec.From(resp.JSON())
-	if err == nil {
-		consumer(model)
-	} else {
-		fmt.Println("Error during repository-model deserialization: ", err)
-	}
-	return model
-}
-
-// CodecRepository This struct is an implementation used for repository.GithubRepositoryModel deserialization.
-type CodecRepository struct {
-	codec.Provider[GithubRepositoryModel]
-}
-
-// From This function's override is used to handle and deserialize correctly the json's information to create a new
-// repository.GithubRepositoryModel object.
-func (r *CodecRepository) From(json string) (*GithubRepositoryModel, error) {
-	var repository GithubRepositoryModel
-	err := json2.Unmarshal([]byte(json), &repository)
-	if err != nil {
-		return nil, err
-	}
-	return &repository, nil
 }

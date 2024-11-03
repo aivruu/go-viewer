@@ -22,37 +22,35 @@
 package repository
 
 import (
-	json2 "encoding/json"
-	"fmt"
-	http2 "net/http"
 	"strconv"
 	"strings"
-	"time"
 	"viewer/main/common"
 	"viewer/main/download"
-	"viewer/main/http"
-	"viewer/main/repository/codec"
 	"viewer/main/repository/operator"
-	"viewer/main/utils"
 )
 
 // GithubReleaseModel This struct stores all necessary information for the repository's requested release.
-type GithubReleaseModel struct {
+type (
+	GithubReleaseModel struct {
+		Author   Author  `json:"author"`
+		TagName  string  `json:"tag_name"`
+		Name     string  `json:"name"`
+		UniqueId int     `json:"id"`
+		Assets   []Asset `json:"assets"`
+		common.RequestableModel
+	}
+
+	// Author This struct only stores the release's author's github-username from the request.
 	Author struct {
 		Login string `json:"login"`
-	} `json:"author"`
-	TagName  string  `json:"tag_name"`
-	Name     string  `json:"name"`
-	UniqueId int     `json:"id"`
-	Assets   []Asset `json:"assets"`
-	common.RequestableModel
-}
+	}
 
-// Asset This struct stores a release's asset's name and url to be used for downloading later.
-type Asset struct {
-	Name string `json:"name"`
-	Url  string `json:"browser_download_url"`
-}
+	// Asset This struct stores a release's asset's name and url to be used for downloading later.
+	Asset struct {
+		Name string `json:"name"`
+		Url  string `json:"browser_download_url"`
+	}
+)
 
 // Download This method tries to download the asset-specified for this release from the array of assets into specified directory,
 // and will return a boolean value whether the asset-number is valid, and asset was downloaded correctly.
@@ -94,60 +92,4 @@ func (r *GithubReleaseModel) Compare(operatorType operator.Operator, targetVersi
 	default:
 		return false
 	}
-}
-
-// codec.Provider's implementation necessary for this type.
-var releaseCodec = CodecRelease{}
-
-// RequestReleaseModelImpl This codec.Provider implementation is used to handle requests for repositories' releases.
-type RequestReleaseModelImpl struct {
-	http.RequestModel[GithubReleaseModel]
-	url string
-}
-
-// NewReleaseRequest This function creates a new RequestReleaseModelImpl with the given url.
-func NewReleaseRequest(url string) *RequestReleaseModelImpl {
-	return &RequestReleaseModelImpl{url: url}
-}
-
-func (r *RequestReleaseModelImpl) RequestWith(client *http2.Client, timeout time.Duration) *GithubReleaseModel {
-	resp := utils.Response(utils.ValidateAndModifyTimeout(client, timeout), r.url)
-	if resp == nil || resp.StatusCode() != http.ResponseOkStatus {
-		return nil
-	}
-	model, err := releaseCodec.From(resp.JSON())
-	if err != nil {
-		fmt.Println("Error during release-model deserialization: ", err)
-	}
-	return model
-}
-
-func (r *RequestReleaseModelImpl) RequestWithAndThen(client *http2.Client, consumer common.RequestConsumer[GithubReleaseModel], timeout time.Duration) *GithubReleaseModel {
-	resp := utils.Response(utils.ValidateAndModifyTimeout(client, timeout), r.url)
-	if resp == nil || resp.StatusCode() != http.ResponseOkStatus {
-		return nil
-	}
-	model, err := releaseCodec.From(resp.JSON()) // Obtain result from async.Future pass the received JSON (body).
-	if err != nil {
-		consumer(model)
-	} else {
-		fmt.Println("Error during release-model deserialization: ", err)
-	}
-	return model
-}
-
-// CodecRelease This struct is an implementation used for repository.GithubReleaseModel deserialization.
-type CodecRelease struct {
-	codec.Provider[GithubReleaseModel]
-}
-
-// From This function's override is used to handle and deserialize correctly the json's information to create a new
-// repository.GithubReleaseModel object.
-func (c *CodecRelease) From(json string) (*GithubReleaseModel, error) {
-	var release GithubReleaseModel
-	err := json2.Unmarshal([]byte(json), &release)
-	if err != nil {
-		return nil, err
-	}
-	return &release, nil
 }

@@ -21,35 +21,39 @@
 
 package async
 
-import "sync"
+import (
+	"sync"
+	"viewer/main/http"
+)
 
 // Future This struct is used to represents and manages the result of an asynchronous computation.
-type Future[T any] struct {
-	result chan T
+type Future[R http.ResponseModel] struct {
+	result chan R
 }
 
 // NewFuture This method creates a new Future object using the specified function, this function may return a value, or nil.
-func NewFuture[T any](fn func() *T) Future[T] {
+func NewFuture[R http.ResponseModel](fn func() *R) Future[R] {
 	rwMut := sync.RWMutex{}
-	f := Future[T]{make(chan T)}
+	f := Future[R]{make(chan R)}
 	rwMut.RLock()
 	// Use goroutines for channel-to-channel communication.
 	go func() {
 		result := fn()
 		// Avoid dereferencing for a null pointer
 		if result == nil {
-			result = new(T)
+			result = new(R)
 		}
 		// Give to channel the pointer's value.
 		f.result <- *result
 	}()
-	rwMut.RUnlock()
+	defer rwMut.RUnlock()
 	return f
 }
 
 // Get This method returns this Future's channel's value (result) when it becomes available, this value may be nil depending on
 // the operation's use
-func (f *Future[T]) Get() *T {
+func (f *Future[R]) Get() *R {
 	value := <-f.result
+	defer close(f.result)
 	return &value
 }

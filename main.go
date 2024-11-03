@@ -125,7 +125,7 @@ func printRepositoryInformation(model *repository.GithubRepositoryModel) {
 	fmt.Println("Forks ->", model.Forks)
 	fmt.Println("Forks Allowed ->", repository.FormatBooleanValue(model.CanFork))
 	fmt.Println("Language ->", model.Language)
-	fmt.Println("License ->", model.License.Name)
+	fmt.Println("License ->", model.LicenseType.Name)
 	fmt.Println("Public ->", repository.FormatBooleanValue(!model.Private))
 	fmt.Println("Archived ->", repository.FormatBooleanValue(model.Archived))
 	fmt.Println("Disabled ->", repository.FormatBooleanValue(model.Disabled))

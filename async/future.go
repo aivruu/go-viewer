@@ -22,17 +22,18 @@
 package async
 
 import (
+	http2 "net/http"
 	"sync"
 	"viewer/main/http"
 )
 
 // Future This struct is used to represents and manages the result of an asynchronous computation.
-type Future[R http.ResponseModel] struct {
+type Future[R http2.Response | http.ResponseModel] struct {
 	result chan R
 }
 
 // NewFuture This method creates a new Future object using the specified function, this function may return a value, or nil.
-func NewFuture[R http.ResponseModel](fn func() *R) Future[R] {
+func NewFuture[R http2.Response | http.ResponseModel](fn func() *R) Future[R] {
 	rwMut := sync.RWMutex{}
 	f := Future[R]{make(chan R)}
 	rwMut.RLock()

@@ -46,8 +46,7 @@ func From(directory string, fileName string, url string) DownloadingStatusProvid
 	}
 	// [os.File] object closing and error handling.
 	defer func(File *os.File) {
-		err := File.Close()
-		if err != nil {
+		if err := File.Close(); err != nil {
 			fmt.Println("Error during File closing: ", err)
 		}
 	}(file)
@@ -57,19 +56,16 @@ func From(directory string, fileName string, url string) DownloadingStatusProvid
 	if resp == nil {
 		return WithDownloadError()
 	}
-	// Store body to avoid copying it while accessing.
-	body := resp.Body
-	size, err := io.Copy(file, body)
+	size, err := io.Copy(file, resp.Body)
 	if err != nil {
 		fmt.Println("Error body's information copying into file: ", err)
 		return WithDownloadError()
 	}
-	defer func(Body *io.ReadCloser) {
-		err := (*Body).Close()
-		if err != nil {
+	defer func(Body io.ReadCloser) {
+		if err := Body.Close(); err != nil {
 			fmt.Println("Error during body closing: ", err)
 		}
-	}(&body)
+	}(resp.Body)
 	if size == 0 {
 		return WithUnknownAsset()
 	}

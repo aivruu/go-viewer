@@ -51,7 +51,7 @@ func TestRepositoryRequest(t *testing.T) {
 	// Test using "consumer" function to print repository's information if it is available.
 	repositoryRequest := repository.NewRepositoryRequest(ForRepository("aivruu", "repo-viewer"))
 	model := http.RequestAndThen(repositoryRequest, func(Model *repository.GithubRepositoryModel) {
-		t.Logf("%s - %s - %s", Model.Owner, Model.Name, Model.License.Name)
+		t.Logf("%s - %s - %s", Model.Owner, Model.Name, Model.LicenseType.Name)
 		t.Log()
 		t.Log(Model.Archived)
 		t.Log(Model.Forks)

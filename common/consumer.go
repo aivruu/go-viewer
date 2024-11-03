@@ -21,5 +21,6 @@
 
 package common
 
-// RequestConsumer Simple type with single function used to represent Consumers.
+// RequestConsumer Simple type with single function used to represent Consumers, execute defined logic when a model of type
+// *M is provided.
 type RequestConsumer[M RequestableModel] func(*M)

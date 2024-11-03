@@ -46,8 +46,7 @@ func asyncResponse(client *http.Client, url string) async.Future[vhttp.ResponseM
 		}
 		// Close body after reading.
 		defer func(Body io.ReadCloser) {
-			err := Body.Close()
-			if err != nil {
+			if err := Body.Close(); err != nil {
 				fmt.Println("Error during Body closing: ", err)
 			}
 		}(resp.Body)

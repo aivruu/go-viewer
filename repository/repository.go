@@ -23,8 +23,13 @@ package repository
 
 import "viewer/main/common"
 
-// GithubRepositoryModel This struct represents a requested repository with all its information.
+const (
+	TrueFormatted  = "Yes"
+	FalseFormatted = "No"
+)
+
 type (
+	// GithubRepositoryModel This struct represents a requested repository with all its information.
 	GithubRepositoryModel struct {
 		Owner       Owner    `json:"owner"`
 		LicenseType License  `json:"license"`
@@ -43,14 +48,17 @@ type (
 		common.RequestableModel
 	}
 
+	// Owner Provides information about the owner of the repository.
 	Owner struct {
 		Login string `json:"login"`
 	}
 
+	// License Provides information about the license of the repository.
 	License struct {
 		Name string `json:"name"`
 	}
 
+	// Parent Provides information about the original repository's creator.
 	Parent struct {
 		Owner string `json:"owner"`
 	}
@@ -59,7 +67,7 @@ type (
 // FormatBooleanValue This function returns a readable string that correspond to the value for the given boolean.
 func FormatBooleanValue(value bool) string {
 	if value {
-		return "Yes"
+		return TrueFormatted
 	}
-	return "No"
+	return FalseFormatted
 }

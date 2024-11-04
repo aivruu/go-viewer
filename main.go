@@ -31,10 +31,26 @@ import (
 	"viewer/main/repository"
 )
 
+func showArgumentsUsage() {
+	fmt.Println()
+	fmt.Println("The specified arguments amount is not valid.")
+	fmt.Println("To specify a request for an specific repository, arguments should look like this:")
+	fmt.Println(" - gvw <user> <repository>")
+	fmt.Println("To specify a request for an specific release, arguments should look like this:")
+	fmt.Println(" - gvw <user> <repository> <release>")
+	fmt.Println("[*] You can get repository's latest release by specifying 'latest' word.")
+	fmt.Println("To download assets from a published release, arguments should look like this:")
+	fmt.Println("[*] Index parameter should look like this '*' if you want to download all assets,\notherwise you must specify the asset's index.")
+	fmt.Println("[*] If you want to download the files at the current directory, let the parameter empty using double quotes.")
+	fmt.Println(" - gvw <user> <repository> <release> <index> <directory>")
+	fmt.Println("Example: - gvw aivruu repo-viewer latest * [you must use double quotes here to let it empty]")
+	fmt.Println()
+}
+
 func main() {
 	argsAmount := len(os.Args)
 	if argsAmount < 2 || argsAmount > 6 {
-		fmt.Println("Invalid arguments amount, four for release-info | six for assets download, and two for repository.")
+		showArgumentsUsage()
 		return
 	}
 	if (argsAmount == 6) && (strings.Contains(os.Args[3], ".") || strings.Contains(os.Args[3], "latest")) {

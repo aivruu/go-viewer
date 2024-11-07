@@ -50,8 +50,7 @@ func asyncResponse(client *http.Client, url string) async.Future[vhttp.ResponseM
 				fmt.Println("Error during Body closing: ", err)
 			}
 		}(resp.Body)
-		respModel := vhttp.NewResponseModel(string(read), resp.StatusCode, resp.Body)
-		return &respModel
+		return &vhttp.ResponseModel{JSON: string(read), StatusCode: resp.StatusCode, Body: resp.Body}
 	})
 }
 
@@ -67,7 +66,7 @@ func Response(client *http.Client, url string) *vhttp.ResponseModel {
 // instance is null or is the http.DefaultClient reference, the function will return the DefaultClient instance instead,
 // otherwise, it will modify the client's timeout and return the same client instance (no copies).
 func ValidateAndModifyTimeout(client *http.Client, timeout time.Duration) *http.Client {
-	if (client == nil) || client == http.DefaultClient {
+	if client == nil || client == http.DefaultClient {
 		return vhttp.DefaultClient
 	}
 	client.Timeout = timeout

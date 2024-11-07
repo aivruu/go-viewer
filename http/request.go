@@ -45,7 +45,7 @@ type RequestModel[M common.RequestableModel] interface {
 	// RequestWithAndThen This method request to the URL using the given http.Client and timeout to provide the model
 	// (if it is available) with the requested information. Also, if the model is available, it will be used to execute the
 	// specified consumer's logic.
-	RequestWithAndThen(client *http.Client, consumer common.RequestConsumer[M], timeout time.Duration) *M
+	RequestWithAndThen(client *http.Client, consumer func(*M), timeout time.Duration) *M
 }
 
 // Request This function realizes the same execution that RequestAndThen with the difference that this uses a default
@@ -56,6 +56,6 @@ func Request[M common.RequestableModel](requestModel RequestModel[M], timeout ti
 
 // RequestAndThen This function realizes the same execution that RequestWithAndThen with the difference that this uses a
 // default http.Client to make the request.
-func RequestAndThen[M common.RequestableModel](requestModel RequestModel[M], consumer common.RequestConsumer[M], timeout time.Duration) *M {
+func RequestAndThen[M common.RequestableModel](requestModel RequestModel[M], consumer func(*M), timeout time.Duration) *M {
 	return requestModel.RequestWithAndThen(nil, consumer, timeout)
 }

@@ -4,7 +4,6 @@ import (
 	"fmt"
 	http2 "net/http"
 	"time"
-	"viewer/main/common"
 	"viewer/main/http"
 	"viewer/main/utils"
 )
@@ -35,7 +34,7 @@ func (r *RequestReleaseModelImpl) RequestWith(client *http2.Client, timeout time
 	return model
 }
 
-func (r *RequestReleaseModelImpl) RequestWithAndThen(client *http2.Client, consumer common.RequestConsumer[GithubReleaseModel], timeout time.Duration) *GithubReleaseModel {
+func (r *RequestReleaseModelImpl) RequestWithAndThen(client *http2.Client, consumer func(*GithubReleaseModel), timeout time.Duration) *GithubReleaseModel {
 	resp := utils.Response(utils.ValidateAndModifyTimeout(client, timeout), r.url)
 	if resp == nil || resp.StatusCode != http.ResponseOkStatus {
 		return nil

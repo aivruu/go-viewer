@@ -33,15 +33,18 @@ const (
 
 // ForRepository This function formats the GithubApiUrl to include the author and repository specified to create a valid
 // url for a request.
-func ForRepository(author string, repository string) string {
+func ForRepository(author, repository string) string {
 	return fmt.Sprintf(GithubApiUrl, author, repository)
 }
 
 // ForRelease This function formats the GithubApiReleaseUrl to include the author, repository and tag specified to create a valid
 // url for a request.
-func ForRelease(author string, repository string, tag string) string {
-	if tag == "latest" {
-		return fmt.Sprintf(strings.Replace(GithubApiReleaseUrl, "tags/", "", 1), author, repository, "latest")
+func ForRelease(author, repository, tag string) string {
+	var version string
+	if strings.Index(tag, "latest") < 0 {
+		version = tag
+	} else {
+		version = strings.Replace(GithubApiReleaseUrl, "tags/", "", 1)
 	}
-	return fmt.Sprintf(GithubApiReleaseUrl, author, repository, tag)
+	return fmt.Sprintf(GithubApiReleaseUrl, author, repository, version)
 }

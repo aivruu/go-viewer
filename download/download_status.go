@@ -32,60 +32,50 @@ const (
 
 // DownloadingStatusProvider This struct is used as status-provider for the repositories' assets' downloads.
 type DownloadingStatusProvider struct {
-	status byte  // The response's code.
-	result int64 // The amount of bytes read from the downloaded file.
+	Status byte  // The response's code.
+	Result int64 // The amount of bytes read from the downloaded file.
 }
 
 // WithAssetDownload This method creates a new DownloadingStatusProvider using the given amount of read-bytes, and the
 // AssetDownloadedStatus status.
 func WithAssetDownload(result int64) DownloadingStatusProvider {
-	return DownloadingStatusProvider{status: AssetDownloadedStatus, result: result}
+	return DownloadingStatusProvider{Status: AssetDownloadedStatus, Result: result}
 }
 
 // WithUnknownAsset This method creates a new DownloadingStatusProvider using the UnknownAssetDefaultSize for result-value,
 // and providing the UnknownAssetStatus status.
 func WithUnknownAsset() DownloadingStatusProvider {
-	return DownloadingStatusProvider{status: UnknownAssetStatus, result: UnknownAssetDefaultSize}
+	return DownloadingStatusProvider{Status: UnknownAssetStatus, Result: UnknownAssetDefaultSize}
 }
 
 // WithInvalidUrl This method creates a new DownloadingStatusProvider using the InvalidAssetDefaultSize for result-value,
 // and using the InvalidAssetUrlStatus status.
 func WithInvalidUrl() DownloadingStatusProvider {
-	return DownloadingStatusProvider{status: InvalidAssetUrlStatus, result: InvalidAssetDefaultSize}
+	return DownloadingStatusProvider{Status: InvalidAssetUrlStatus, Result: InvalidAssetDefaultSize}
 }
 
 // WithDownloadError This method creates a new DownloadingStatusProvider using the InvalidAssetDefaultSize for result-value,
 // and using the AssetDownloadErrorStatus status.
 func WithDownloadError() DownloadingStatusProvider {
-	return DownloadingStatusProvider{status: AssetDownloadErrorStatus, result: InvalidAssetDefaultSize}
-}
-
-// Status This method returns this instance's status-code.
-func (d *DownloadingStatusProvider) Status() byte {
-	return d.status
-}
-
-// Result This method returns this object's result (read-bytes).
-func (d *DownloadingStatusProvider) Result() int64 {
-	return d.result
+	return DownloadingStatusProvider{Status: AssetDownloadErrorStatus, Result: InvalidAssetDefaultSize}
 }
 
 // Downloaded This method return whether the status-code is AssetDownloadedStatus.
 func (d *DownloadingStatusProvider) Downloaded() bool {
-	return d.status == AssetDownloadedStatus
+	return d.Status == AssetDownloadedStatus
 }
 
 // Unknown This method return whether the status-code is UnknownAssetStatus.
 func (d *DownloadingStatusProvider) Unknown() bool {
-	return d.status == UnknownAssetStatus
+	return d.Status == UnknownAssetStatus
 }
 
 // InvalidUrl This method return whether the status-code is InvalidAssetUrlStatus.
 func (d *DownloadingStatusProvider) InvalidUrl() bool {
-	return d.status == InvalidAssetUrlStatus
+	return d.Status == InvalidAssetUrlStatus
 }
 
 // Error This method return whether the status-code is AssetDownloadErrorStatus.
 func (d *DownloadingStatusProvider) Error() bool {
-	return d.status == AssetDownloadErrorStatus
+	return d.Status == AssetDownloadErrorStatus
 }

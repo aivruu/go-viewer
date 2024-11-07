@@ -25,10 +25,10 @@ func NewReleaseRequest(url string) *RequestReleaseModelImpl {
 
 func (r *RequestReleaseModelImpl) RequestWith(client *http2.Client, timeout time.Duration) *GithubReleaseModel {
 	resp := utils.Response(utils.ValidateAndModifyTimeout(client, timeout), r.url)
-	if resp == nil || resp.StatusCode() != http.ResponseOkStatus {
+	if resp == nil || resp.StatusCode != http.ResponseOkStatus {
 		return nil
 	}
-	model, err := releaseCodec.From(resp.JSON())
+	model, err := releaseCodec.From(resp.JSON)
 	if err != nil {
 		fmt.Println("Error during release-model deserialization: ", err)
 	}
@@ -37,10 +37,10 @@ func (r *RequestReleaseModelImpl) RequestWith(client *http2.Client, timeout time
 
 func (r *RequestReleaseModelImpl) RequestWithAndThen(client *http2.Client, consumer common.RequestConsumer[GithubReleaseModel], timeout time.Duration) *GithubReleaseModel {
 	resp := utils.Response(utils.ValidateAndModifyTimeout(client, timeout), r.url)
-	if resp == nil || resp.StatusCode() != http.ResponseOkStatus {
+	if resp == nil || resp.StatusCode != http.ResponseOkStatus {
 		return nil
 	}
-	model, err := releaseCodec.From(resp.JSON()) // Obtain result from async.Future pass the received JSON (body).
+	model, err := releaseCodec.From(resp.JSON) // Obtain result from async.Future pass the received JSON (body).
 	if err != nil {
 		consumer(model)
 	} else {

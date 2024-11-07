@@ -25,27 +25,7 @@ import "io"
 
 // ResponseModel This struct represents a provided response's main information, such as Body, body as json-text, and status-code.
 type ResponseModel struct {
-	json       string
-	statusCode int
-	body       io.ReadCloser
-}
-
-// NewResponseModel This function creates a new ResponseModel object with the given parameters.
-func NewResponseModel(json string, statusCode int, body io.ReadCloser) ResponseModel {
-	return ResponseModel{json: json, statusCode: statusCode, body: body}
-}
-
-// JSON This method returns the json-body for this response.
-func (r *ResponseModel) JSON() string {
-	return r.json
-}
-
-// StatusCode This method returns the status-code for this response.
-func (r *ResponseModel) StatusCode() int {
-	return r.statusCode
-}
-
-// Body This method returns the Body for this response.
-func (r *ResponseModel) Body() io.ReadCloser {
-	return r.body
+	JSON       string
+	StatusCode int
+	Body       io.ReadCloser
 }

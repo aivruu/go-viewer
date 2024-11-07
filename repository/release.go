@@ -64,7 +64,7 @@ func (r *GithubReleaseModel) Download(directory string, assetNum int) int64 {
 	}
 	asset := r.Assets[assetNum]
 	downloadStatus := download.From(directory, asset.Name, asset.Url)
-	return downloadStatus.Result()
+	return downloadStatus.Result
 }
 
 // Compare This method compares the given version-number with this release's tag-name (as int) using the specified operator-type

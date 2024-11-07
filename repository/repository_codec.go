@@ -14,8 +14,7 @@ type RepositoryCodecProvider struct {
 // repository.GithubRepositoryModel object.
 func (r *RepositoryCodecProvider) From(json string) (*GithubRepositoryModel, error) {
 	var model GithubRepositoryModel
-	err := json2.Unmarshal([]byte(json), &model)
-	if err != nil {
+	if err := json2.Unmarshal([]byte(json), &model); err != nil {
 		return nil, err
 	}
 	return &model, nil
